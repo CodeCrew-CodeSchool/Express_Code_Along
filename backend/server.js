@@ -1,8 +1,9 @@
 const express = require('express'); // Bring in our express module
 const app = express() // Start using express
-const PORT = 3004; // Port num
+const PORT = 3001; // Port num
 const weather = require('./weather.json'); // data we need
 const cors = require('cors'); // security stuff
+const axios = require("axios");
 
 
 app.use(cors()); // all routes are open
@@ -16,42 +17,55 @@ app.get('/hello', (req, res) => {
 //  If the user did not search for one of the three cities that we have information about (Seattle, Paris, or Amman), 
 //  return an error.
 
-app.get('/weather', (request, response) => {
-    // let {searchQuery} = request.query; 
-    let cityName = request.query.cityName //my city search
-    // // console.log(cityName);
-    let lon = request.query.lon; // lon data
-    let lat = request.query.lat; // lat data
- 
+// LAB 08
 
-    // console.log(`${cityName}: lon is: ${lon}, lat is : ${lat}`);
-    const city = weather.find(city => city.city_name.toLowerCase() === cityName.toLowerCase());
-    console.log(city);
+const handleWeather = async (request, response) => {
+    let {lat, lon} = request.query;
 
-    try {
-   const weatherArray = city.data.map(day => new Forecast(day));
-   response.status(200).send(weatherArray); // send back the data here :)     
-    } catch (error) {
-        console.log(error);
-    }
-
-});
+    try{
+        let API = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=ed52bef248534843b00235082352d388&include=minutely`;
+        let res = await axios.get(API);
+        const weatherArray = res.data.data.map(day => new Forecast(day));
+        response.status(200).send(weatherArray);
+        }catch(e){
+            console.log(e);
+        }
 
 
-// class Rectangle {
-//     constructor(height, width) {
-//       this.height = height;
-//       this.width = width;
-//     }
-//   }
-// Create a class for `Forecast`, that has properties of `date` and `description`.
+}
+
+
+app.get('/weather', handleWeather)
+
 
 class Forecast{
     constructor(day){
-        this.date = day.valid_date;
+        this.date = day.ob_time;
         this.description = day.weather.description;
 
     }
 }
 
 app.listen(PORT, () => {console.log('I am listening!')});
+
+// LAB 07
+// app.get('/weather', (request, response) => {
+//     // let {searchQuery} = request.query; 
+//     let cityName = request.query.cityName //my city search
+//     // // console.log(cityName);
+//     let lon = request.query.lon; // lon data
+//     let lat = request.query.lat; // lat data
+ 
+
+//     // console.log(`${cityName}: lon is: ${lon}, lat is : ${lat}`);
+//     const city = weather.find(city => city.city_name.toLowerCase() === cityName.toLowerCase());
+//     console.log(city);
+
+//     try {
+//    const weatherArray = city.data.map(day => new Forecast(day));
+//    response.status(200).send(weatherArray); // send back the data here :)     
+//     } catch (error) {
+//         console.log(error);
+//     }
+
+// });

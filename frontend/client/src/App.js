@@ -8,28 +8,44 @@ constructor(props) {
   this.state = {
     
      weatherData: [],
+     searchString: '',
+     cityName: '',
+     lat:'',
+     lon:'',
   }
 }
+
 handleMap = async () => {
   // user search goes here
   // 3rd paty api 
-  let res = await axios.get('http://locationiq.com?key=37373733262317&q=Seattle&format=json');
-console.log(res);
-try {
-  this.handleWeather('Seattle')
-} catch (error) {
-  console.log(error);
-}
+  
+  const API = `https://us1.locationiq.com/v1/search?key=pk.b2116695b73495b18f3446606a5171d2&q=${this.state.searchString}&format=json`;
+
+  try{
+  let res = await axios.get(API);
+  let city = res.data[0];
+    this.setState({cityName: city.display_name, lat: city.lat, lon: city.lon }, () => this.handleWeather(this.state.lat, this.state.lon));
+  
+  
+  }catch(error){
+    console.error(error);
+  }
 
 
 }
 
-  handleWeather = async (cityName) => {
+handleChange = (e) => {
+this.setState({searchString: e.target.value});
+}
+
+  handleWeather = async (lat, lon) => {
     // "?" == incoming parameters
     
-    const API = `http://localhost:3004/weather?cityName=${cityName}`; // our weather URL with query parameters
+    const API = `http://localhost:3001/weather?lat=${lat}&lon=${lon}`; // our weather URL with query parameters
     const res = await axios.get(API);
-    this.setState({weatherData: res.data});
+    this.setState({weatherData: res.data[0]});
+
+    
     
   }
   render() {
@@ -40,18 +56,24 @@ try {
         {/* axios */}
         {/* my server's localhost */}
         {/* http://localhost:3004/  this is how we talk to our backend!*/}
-       {this.state.weatherData.map((day) => {
-         return(
-        <>
-       
-        <h1>{day.date}</h1>
-        <h2>{day.description}</h2>
-      
-        </>
-          )
-       })}
-         
-      <button onClick={this.handleButton}>Get Weather</button>
+
+ {this.state.weatherData !==  null ? 
+
+<>
+  <h2>{this.state.weatherData.date}</h2>
+  <h3>{this.state.weatherData.description}</h3>
+  </>
+  : null
+ }
+ 
+ 
+
+
+  
+
+       <h1>{this.state.cityName}</h1>
+         <input onChange={this.handleChange} type="search" placeholder='Search 4 a city'/>
+      <button onClick={this.handleMap}>Explore</button>
       </div>
     )
   }
