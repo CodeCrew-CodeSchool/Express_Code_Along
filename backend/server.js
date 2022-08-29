@@ -9,7 +9,7 @@ const axios = require("axios");
 app.use(cors()); // all routes are open
 
 
-app.get('/hello', (req, res) => {
+app.get('/', (req, res) => {
     res.send('Hello Class 301'); // this is what I want to return back to my client (React App)
 })
 
@@ -20,10 +20,15 @@ app.get('/hello', (req, res) => {
 // LAB 08
 
 const handleWeather = async (request, response) => {
-    let {lat, lon} = request.query;
+    let {lat, lon} = request.query; // ES6 Destructuring
+
+    // equivalent to above
+    // let lat = request.query.lat;
+    // let lon = request.query.lon;
+
 
     try{
-        let API = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=ed52bef248534843b00235082352d388&include=minutely`;
+        let API = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=8a5cd6d51ba24518bfc97cb02a696c0d&include=minutely`;
         let res = await axios.get(API);
         const weatherArray = res.data.data.map(day => new Forecast(day));
         response.status(200).send(weatherArray);
@@ -35,9 +40,9 @@ const handleWeather = async (request, response) => {
 }
 
 
-app.get('/weather', handleWeather)
+app.get('/weather', handleWeather) // weather route
 
-
+// forcast class :)
 class Forecast{
     constructor(day){
         this.date = day.ob_time;
