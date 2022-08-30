@@ -12,28 +12,33 @@ export default class App extends Component {
       cityName: '',
       lat: '',
       lon: '',
+      displayMap: false, // will be set to true when axios call is complete
     }
   }
 
   handleMap = async () => {
     // user search goes here
     // 3rd paty api 
-
     const API = `https://us1.locationiq.com/v1/search?key=pk.b2116695b73495b18f3446606a5171d2&q=${this.state.searchString}&format=json`;
+
 
     try {
       let res = await axios.get(API);
       let city = res.data[0];
       // as soon as state is set, I implemented a callback func to run my weather function!
-      this.setState({ cityName: city.display_name, lat: city.lat, lon: city.lon }, () => this.handleWeather(this.state.lat, this.state.lon));
+       this.setState({ cityName: city.display_name, lat: city.lat, lon: city.lon, displayMap:true }); // gets my lat and lon.. and sets displayMap to true!
+      
+    
 
 
     } catch (error) {
       console.error(error);
     }
+ 
 
 
   }
+
 
   handleChange = (e) => {
     this.setState({ searchString: e.target.value });
@@ -57,7 +62,9 @@ export default class App extends Component {
         {/* This is where our weather data will appear: */}
         <h2>{this.state.weatherData.date}</h2> 
         <h3>{this.state.weatherData.description}</h3>
-
+        
+       {/* Used a ternary here. If displayMap is true, show map fromt he lon and lat! */}
+       {this.state.displayMap && <img src={`https://maps.locationiq.com/v3/staticmap?key=pk.b2116695b73495b18f3446606a5171d2&center=${this.state.lat},${this.state.lon}&zoom=18&size=480x480&format=jpeg`} alt="map" /> }
 
 
         <h1>{this.state.cityName}</h1>
